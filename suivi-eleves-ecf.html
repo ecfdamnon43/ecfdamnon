@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>ECF DAMNON · Suivi Permis B</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --navy:#1B3A6B;--navy2:#243F72;
+  --bg:#F0F2F7;--card:#FFF;
+  --row1:#EEF1F8;--row2:#F6F8FC;
+  --border:#D4DAE8;--border2:#B0BBCF;
+  --text:#1A1F2E;--text2:#5A6278;--text3:#9AA0B4;
+  --green:#1C7A42;--orange:#C06000;
+  --r:10px;--rsm:7px;--font:'DM Sans',sans-serif;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;font-size:15px}
+
+.hd{background:var(--navy);color:#fff;padding:0 16px;position:sticky;top:0;z-index:50}
+.hd-top{height:52px;display:flex;align-items:center;justify-content:space-between}
+.hd-logo{display:flex;align-items:center;gap:9px}
+.hd-ecf{background:#fff;color:var(--navy);font-weight:700;font-size:11px;padding:3px 7px;border-radius:4px;letter-spacing:.5px}
+.hd-title{font-size:15px;font-weight:500}
+.hd-sub{font-size:11px;color:rgba(255,255,255,.5);padding-bottom:10px;font-style:italic}
+.hd-right{display:flex;align-items:center;gap:8px}
+.hd-count{font-size:12px;background:rgba(255,255,255,.18);padding:4px 10px;border-radius:20px}
+.sync-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;font-family:var(--font);font-size:12px;padding:4px 10px;border-radius:20px;cursor:pointer;display:flex;align-items:center;gap:5px}
+.sync-btn:hover{background:rgba(255,255,255,.25)}
+.sync-ico{display:inline-block}
+.sync-btn.spinning .sync-ico{animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.wrap{max-width:720px;margin:0 auto;padding:14px 12px 80px}
+
+.topbar{display:flex;gap:8px;margin-bottom:12px}
+.sw{flex:1;position:relative}
+.sw input{width:100%;background:var(--card);border:1px solid var(--border);border-radius:var(--rsm);padding:10px 12px 10px 36px;font-family:var(--font);font-size:14px;color:var(--text);outline:none}
+.sw input:focus{border-color:var(--navy)}
+.sw input::placeholder{color:var(--text3)}
+.si{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:16px;pointer-events:none}
+.btn-add{background:var(--navy);color:#fff;border:none;border-radius:var(--rsm);padding:10px 18px;font-family:var(--font);font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap}
+.btn-add:active{opacity:.85}
+
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:11px 14px;text-align:center}
+.stat-val{font-size:22px;font-weight:600;line-height:1.1}
+.stat-lbl{font-size:11px;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:.5px}
+
+.tbl-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{background:var(--navy);color:#fff;font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;padding:10px 12px;text-align:left}
+.tbl th.right{text-align:right}
+.tbl td{padding:11px 12px;border-bottom:1px solid var(--border);font-size:14px;vertical-align:middle}
+.tbl td.right{text-align:right}
+.tbl td:first-child{text-align:center;color:var(--text3);font-size:12px;font-weight:500;width:36px}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:nth-child(odd) td{background:var(--row1)}
+.tbl tr:nth-child(even) td{background:var(--row2)}
+.tbl tr:hover td{background:#DDE3F0;cursor:pointer}
+.td-name{font-weight:500}
+.td-prenom{color:var(--text2)}
+.pill{display:inline-block;padding:3px 9px;border-radius:20px;font-size:12px;font-weight:500;background:rgba(27,58,107,.1);color:var(--navy2);white-space:nowrap}
+.pill.empty{background:transparent;color:var(--text3);font-style:italic;font-weight:400}
+.h-done{font-weight:500;color:var(--green)}
+.h-warn{font-weight:500;color:var(--orange)}
+.h-none{color:var(--text3);font-style:italic;font-size:13px}
+.cmt{color:var(--text2);font-size:13px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cmt.empty{color:var(--text3);font-style:italic}
+.empty-row td{text-align:center;padding:40px;color:var(--text3);font-style:italic}
+
+.loader{text-align:center;padding:48px;color:var(--text3)}
+.loader-spinner{width:28px;height:28px;border:2px solid var(--border);border-top-color:var(--navy);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px}
+
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:flex-end;justify-content:center}
+.overlay.open{display:flex}
+@media(min-width:600px){.overlay{align-items:center}.drawer{border-radius:var(--r)!important;max-width:480px}}
+.drawer{background:var(--card);width:100%;border-radius:var(--r) var(--r) 0 0;padding:20px 18px 36px;max-height:94vh;overflow-y:auto}
+.dw-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.dw-title{font-size:17px;font-weight:600}
+.dw-num{font-size:13px;color:var(--text3);margin-bottom:18px}
+.dw-close{background:var(--bg);border:none;width:30px;height:30px;border-radius:50%;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2)}
+.dw-close:hover{background:var(--border)}
+
+.fg{margin-bottom:14px}
+.fl{font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;display:block}
+.fi{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--rsm);padding:11px 12px;font-family:var(--font);font-size:15px;color:var(--text);outline:none;-webkit-appearance:none}
+.fi:focus{border-color:var(--navy);background:#fff}
+.fi::placeholder{color:var(--text3)}
+.fi-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+textarea.fi{resize:none;min-height:72px;line-height:1.5}
+
+.bilan-summary{background:var(--bg);border-radius:var(--rsm);padding:12px 14px;margin-bottom:16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.bs-item{text-align:center}
+.bs-val{font-size:16px;font-weight:600;color:var(--navy)}
+.bs-lbl{font-size:11px;color:var(--text3);margin-top:2px}
+.bs-empty{grid-column:1/-1;text-align:center;color:var(--text3);font-size:13px;font-style:italic;padding:6px 0}
+
+.mchips{display:flex;gap:6px;flex-wrap:wrap}
+.mc{padding:7px 13px;border-radius:20px;border:1px solid var(--border);font-size:13px;cursor:pointer;background:var(--card)}
+.mc:hover{border-color:var(--border2)}
+.mc.on{background:rgba(27,58,107,.1);border-color:var(--navy);color:var(--navy);font-weight:500}
+
+.divider{height:1px;background:var(--border);margin:16px 0}
+.brow{display:flex;gap:8px;margin-top:18px}
+.bp{flex:1;background:var(--navy);color:#fff;border:none;border-radius:var(--rsm);padding:13px;font-family:var(--font);font-size:15px;font-weight:500;cursor:pointer}
+.bp:active{opacity:.85}
+.bp:disabled{opacity:.5;cursor:not-allowed}
+.bs2{background:var(--bg);color:var(--text2);border:none;border-radius:var(--rsm);padding:13px 16px;font-family:var(--font);font-size:14px;cursor:pointer}
+.bdel{background:#fbeaea;color:#a81e1e;border:none;border-radius:var(--rsm);padding:13px 14px;font-family:var(--font);font-size:14px;cursor:pointer}
+
+@media(max-width:540px){.col-moniteur,.col-cmt{display:none}}
+
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(70px);background:#1A1F2E;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;z-index:999;transition:transform .28s;white-space:nowrap;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<header class="hd">
+  <div class="hd-top">
+    <div class="hd-logo">
+      <span class="hd-ecf">ECF</span>
+      <span class="hd-title">Suivi des élèves – Permis B</span>
+    </div>
+    <div class="hd-right">
+      <span class="hd-count" id="hdCount">—</span>
+      <button class="sync-btn" id="syncBtn" onclick="syncNow()">
+        <span class="sync-ico">↻</span> Sync
+      </button>
+    </div>
+  </div>
+  <div class="hd-sub">DAMNON | Synchronisé avec Google Sheets</div>
+</header>
+
+<div class="wrap">
+  <div class="topbar">
+    <div class="sw">
+      <span class="si">⌕</span>
+      <input type="text" id="sInput" placeholder="Rechercher un élève…" oninput="render()">
+    </div>
+    <button class="btn-add" onclick="openAdd()">+ Élève</button>
+  </div>
+  <div class="stats" id="statsRow"></div>
+  <div class="loader" id="loader"><div class="loader-spinner"></div>Chargement…</div>
+  <div class="tbl-wrap" id="tblWrap" style="display:none">
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th>N°</th>
+          <th>Nom / Prénom</th>
+          <th>Estimation évaluation</th>
+          <th class="right">Heures au bilan C2</th>
+          <th class="right">Heures estimées après bilan</th>
+          <th class="col-moniteur">Moniteur</th>
+          <th class="col-cmt">Commentaire</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="overlay" id="ov" onclick="closeOut(event)">
+  <div class="drawer">
+    <div class="dw-hd">
+      <span class="dw-title" id="dwTitle"></span>
+      <button class="dw-close" onclick="closeD()">×</button>
+    </div>
+    <div class="dw-num" id="dwNum"></div>
+    <div id="dwBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxmDmbmw2vhqRf0S6z4hN-vWGBp1etgQKvKBBCBP7bINvQM-q4JiohRePEFAreeChxX/exec';
+const MONS = ['Thomas','Sophie','Julien','Marie','Alex'];
+let data = [], selM = null;
+
+// ── Appel API (tout en GET) ──
+async function api(params) {
+  const url = SCRIPT_URL + '?' + new URLSearchParams(params).toString();
+  const r = await fetch(url);
+  const d = await r.json();
+  if (d.error) throw new Error(d.error);
+  return d;
+}
+
+// ── INIT ──
+window.addEventListener('DOMContentLoaded', fetchAll);
+
+async function fetchAll() {
+  setLoading(true);
+  try {
+    const d = await api({ action: 'getAll' });
+    data = d.eleves || [];
+    saveLocal();
+  } catch(e) {
+    console.error('fetchAll:', e);
+    toast('⚠ Hors ligne — données locales');
+    loadLocal();
+  }
+  render();
+  setLoading(false);
+}
+
+function syncNow() {
+  const btn = document.getElementById('syncBtn');
+  btn.classList.add('spinning');
+  fetchAll().finally(() => { btn.classList.remove('spinning'); toast('Synchronisé ✓'); });
+}
+
+// ── LOCAL CACHE (filet de sécurité) ──
+function saveLocal() { try{ localStorage.setItem('ecfb_v5', JSON.stringify(data)); }catch(e){} }
+function loadLocal() { try{ const d=localStorage.getItem('ecfb_v5'); if(d) data=JSON.parse(d); }catch(e){} }
+
+function setLoading(on) {
+  document.getElementById('loader').style.display = on ? 'block' : 'none';
+  document.getElementById('tblWrap').style.display = on ? 'none' : 'block';
+}
+
+// ── RENDER ──
+function render() {
+  const q = document.getElementById('sInput').value.toLowerCase().trim();
+  const list = data.filter(s =>
+    !q || (s.nom+' '+s.prenom).toLowerCase().includes(q) || (s.prenom+' '+s.nom).toLowerCase().includes(q)
+  );
+  const total = data.length;
+  const avecBilan = data.filter(s => s.heuresBilanC2 !== null).length;
+  document.getElementById('hdCount').textContent = total + ' élève'+(total>1?'s':'');
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat"><div class="stat-val">${total}</div><div class="stat-lbl">Élèves</div></div>
+    <div class="stat"><div class="stat-val" style="color:var(--green)">${avecBilan}</div><div class="stat-lbl">Bilan C2 fait</div></div>
+    <div class="stat"><div class="stat-val" style="color:var(--orange)">${total-avecBilan}</div><div class="stat-lbl">En attente</div></div>
+  `;
+  const tbody = document.getElementById('tbody');
+  if (!list.length) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="7">Aucun élève</td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map(s => {
+    const num = data.indexOf(s)+1;
+    const hB  = s.heuresBilanC2!==null ? `<span class="h-done">${s.heuresBilanC2}h</span>` : `<span class="h-none">—</span>`;
+    const hA  = s.heuresApres!==null   ? `<span class="h-warn">${s.heuresApres}h</span>`   : `<span class="h-none">—</span>`;
+    const est = s.estimation ? `<span class="pill">${s.estimation}</span>` : `<span class="pill empty">—</span>`;
+    const cmt = s.commentaire ? `<span class="cmt" title="${s.commentaire}">${s.commentaire}</span>` : `<span class="cmt empty">—</span>`;
+    return `<tr onclick="openFiche('${s.id}')">
+      <td>${num}</td>
+      <td><span class="td-name">${s.nom}</span> <span class="td-prenom">${s.prenom}</span></td>
+      <td>${est}</td><td class="right">${hB}</td><td class="right">${hA}</td>
+      <td class="col-moniteur" style="color:var(--text2);font-size:13px">${s.moniteur}</td>
+      <td class="col-cmt">${cmt}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── FICHE ──
+function openFiche(id) {
+  const s = data.find(x => String(x.id) === String(id)); if (!s) return;
+  selM = s.moniteur;
+  document.getElementById('dwTitle').textContent = s.nom+' '+s.prenom;
+  document.getElementById('dwNum').textContent = 'Élève n°'+(data.indexOf(s)+1)+' · '+s.moniteur;
+  const b = s.heuresBilanC2 !== null;
+  document.getElementById('dwBody').innerHTML = `
+    <div class="bilan-summary">
+      ${b
+        ? `<div class="bs-item"><div class="bs-val">${s.estimation||'—'}</div><div class="bs-lbl">Estimation éval.</div></div>
+           <div class="bs-item"><div class="bs-val">${s.heuresBilanC2}h</div><div class="bs-lbl">Heures bilan C2</div></div>
+           <div class="bs-item"><div class="bs-val">${s.heuresApres}h</div><div class="bs-lbl">Heures après bilan</div></div>`
+        : `<div class="bs-empty">Aucun bilan C2 enregistré</div>`}
+    </div>
+    <div class="fg">
+      <label class="fl">Estimation évaluation (fourchette)</label>
+      <input type="text" class="fi" id="fEstim" value="${s.estimation||''}" placeholder="ex : 20-25h">
+    </div>
+    <div class="fi-row">
+      <div><label class="fl">Heures au bilan C2</label>
+        <input type="number" class="fi" id="fHbilan" value="${s.heuresBilanC2??''}" placeholder="ex : 18" min="0"></div>
+      <div><label class="fl">Heures estimées après bilan</label>
+        <input type="number" class="fi" id="fHapres" value="${s.heuresApres??''}" placeholder="ex : 12" min="0"></div>
+    </div>
+    <div class="fg">
+      <label class="fl">Commentaire</label>
+      <textarea class="fi" id="fCmt" placeholder="Observations…">${s.commentaire||''}</textarea>
+    </div>
+    <div class="fg">
+      <label class="fl">Moniteur</label>
+      <div class="mchips">${MONS.map(m=>`<div class="mc ${s.moniteur===m?'on':''}" onclick="pM('${m}')">${m}</div>`).join('')}</div>
+    </div>
+    <div class="divider"></div>
+    <div class="brow">
+      <button class="bdel" onclick="delEleve('${s.id}')">🗑</button>
+      <button class="bs2" onclick="closeD()">Fermer</button>
+      <button class="bp" id="saveBtn" onclick="saveF('${s.id}')">Enregistrer</button>
+    </div>`;
+  document.getElementById('ov').classList.add('open');
+}
+
+function pM(m) {
+  selM = m;
+  document.querySelectorAll('.mc').forEach(el => el.classList.toggle('on', el.textContent===m));
+}
+
+async function saveF(id) {
+  const s = data.find(x => String(x.id)===String(id)); if (!s) return;
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true; btn.textContent = '…';
+  const hbRaw = document.getElementById('fHbilan').value;
+  const haRaw = document.getElementById('fHapres').value;
+  s.estimation    = document.getElementById('fEstim').value.trim() || null;
+  s.heuresBilanC2 = hbRaw !== '' ? parseInt(hbRaw) : null;
+  s.heuresApres   = haRaw !== '' ? parseInt(haRaw) : null;
+  s.commentaire   = document.getElementById('fCmt').value.trim();
+  s.moniteur      = selM || s.moniteur;
+  try {
+    await api({
+      action: 'save', id: s.id,
+      nom: s.nom, prenom: s.prenom, moniteur: s.moniteur,
+      estimation: s.estimation||'',
+      heuresBilanC2: s.heuresBilanC2??'',
+      heuresApres: s.heuresApres??'',
+      commentaire: s.commentaire||''
+    });
+    saveLocal(); render(); closeD(); toast('Enregistré ✓');
+  } catch(e) {
+    toast('Erreur : '+e.message);
+    btn.disabled = false; btn.textContent = 'Enregistrer';
+  }
+}
+
+async function delEleve(id) {
+  if (!confirm('Supprimer cet élève ?')) return;
+  try {
+    await api({ action:'delete', id });
+    data = data.filter(s => String(s.id) !== String(id));
+    saveLocal(); render(); closeD(); toast('Supprimé');
+  } catch(e) { toast('Erreur suppression'); }
+}
+
+// ── ADD ──
+function openAdd() {
+  selM = MONS[0];
+  document.getElementById('dwTitle').textContent = 'Nouvel élève';
+  document.getElementById('dwNum').textContent = '';
+  document.getElementById('dwBody').innerHTML = `
+    <div class="fi-row">
+      <div><label class="fl">Nom</label><input type="text" class="fi" id="nNom" placeholder="NOM"></div>
+      <div><label class="fl">Prénom</label><input type="text" class="fi" id="nPre" placeholder="Prénom"></div>
+    </div>
+    <div class="fg">
+      <label class="fl">Estimation évaluation (fourchette)</label>
+      <input type="text" class="fi" id="nEstim" placeholder="ex : 20-25h">
+    </div>
+    <div class="fg">
+      <label class="fl">Moniteur</label>
+      <div class="mchips">${MONS.map((m,i)=>`<div class="mc ${i===0?'on':''}" onclick="pM('${m}')">${m}</div>`).join('')}</div>
+    </div>
+    <div class="brow">
+      <button class="bs2" onclick="closeD()">Annuler</button>
+      <button class="bp" id="addBtn" onclick="addS()">Ajouter</button>
+    </div>`;
+  document.getElementById('ov').classList.add('open');
+}
+
+async function addS() {
+  const nom   = document.getElementById('nNom').value.trim().toUpperCase();
+  const pre   = document.getElementById('nPre').value.trim();
+  const estim = document.getElementById('nEstim').value.trim();
+  if (!nom || !pre) { toast('Nom et prénom requis'); return; }
+  const btn = document.getElementById('addBtn');
+  btn.disabled = true; btn.textContent = '…';
+  try {
+    const res = await api({
+      action:'add', nom, prenom:pre,
+      moniteur: selM||MONS[0],
+      estimation: estim||'',
+      heuresBilanC2:'', heuresApres:'', commentaire:''
+    });
+    data.push({ id:res.id, nom, prenom:pre, moniteur:selM||MONS[0], estimation:estim||null, heuresBilanC2:null, heuresApres:null, commentaire:'' });
+    saveLocal(); render(); closeD(); toast(pre+' '+nom+' ajouté ✓');
+  } catch(e) {
+    toast('Erreur : '+e.message);
+    btn.disabled = false; btn.textContent = 'Ajouter';
+  }
+}
+
+function closeD() { document.getElementById('ov').classList.remove('open'); selM=null; }
+function closeOut(e) { if(e.target===document.getElementById('ov')) closeD(); }
+function toast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+</script>
+</body>
+</html>

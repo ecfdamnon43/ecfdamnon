@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>ECF DAMNON · Suivi Moto</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --dark:#2D2D2D;--dark2:#3D3D3D;
+  --bg:#F2F2F0;--card:#FFF;
+  --row1:#F0F0F0;--row2:#FAFAFA;
+  --border:#DDDDD8;--border2:#BBBBB4;
+  --text:#1A1A18;--text2:#5A5A55;--text3:#9A9A94;
+  --a1c:#B06000;--a1bg:#FEF3E2;
+  --a2c:#1A4A90;--a2bg:#EAF0FA;
+  --green:#1C7A42;--orange:#C06000;
+  --r:10px;--rsm:7px;--font:'DM Sans',sans-serif;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;font-size:15px}
+
+.hd{background:var(--dark);color:#fff;padding:0 16px;position:sticky;top:0;z-index:50}
+.hd-top{height:52px;display:flex;align-items:center;justify-content:space-between}
+.hd-logo{display:flex;align-items:center;gap:9px}
+.hd-ecf{background:#fff;color:var(--dark);font-weight:700;font-size:11px;padding:3px 7px;border-radius:4px;letter-spacing:.5px}
+.hd-title{font-size:15px;font-weight:500}
+.hd-sub{font-size:11px;color:rgba(255,255,255,.45);padding-bottom:10px;font-style:italic}
+.hd-right{display:flex;align-items:center;gap:8px}
+.hd-count{font-size:12px;background:rgba(255,255,255,.18);padding:4px 10px;border-radius:20px}
+.sync-btn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);color:#fff;font-family:var(--font);font-size:12px;padding:4px 10px;border-radius:20px;cursor:pointer;display:flex;align-items:center;gap:5px}
+.sync-btn:hover{background:rgba(255,255,255,.22)}
+.sync-ico{display:inline-block}
+.sync-btn.spinning .sync-ico{animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.wrap{max-width:720px;margin:0 auto;padding:14px 12px 80px}
+
+.topbar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.sw{flex:1;min-width:160px;position:relative}
+.sw input{width:100%;background:var(--card);border:1px solid var(--border);border-radius:var(--rsm);padding:10px 12px 10px 36px;font-family:var(--font);font-size:14px;color:var(--text);outline:none}
+.sw input:focus{border-color:var(--dark)}
+.sw input::placeholder{color:var(--text3)}
+.si{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:16px;pointer-events:none}
+
+.tabs{display:flex;gap:6px}
+.tab{padding:9px 14px;border-radius:var(--rsm);border:1px solid var(--border);background:var(--card);font-size:13px;color:var(--text2);cursor:pointer;white-space:nowrap;font-family:var(--font)}
+.tab:hover{border-color:var(--border2)}
+.tab.on-all{background:var(--dark);border-color:var(--dark);color:#fff;font-weight:500}
+.tab.on-A1{background:var(--a1bg);border-color:var(--a1c);color:var(--a1c);font-weight:500}
+.tab.on-A2{background:var(--a2bg);border-color:var(--a2c);color:var(--a2c);font-weight:500}
+
+.btn-add{background:var(--dark);color:#fff;border:none;border-radius:var(--rsm);padding:10px 18px;font-family:var(--font);font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap}
+.btn-add:active{opacity:.85}
+
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:11px 14px;text-align:center}
+.stat-val{font-size:20px;font-weight:600;line-height:1.1}
+.stat-lbl{font-size:11px;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:.5px}
+
+.tbl-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{background:var(--dark);color:#fff;font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;padding:10px 12px;text-align:left}
+.tbl td{padding:11px 12px;border-bottom:1px solid var(--border);font-size:14px;vertical-align:middle}
+.tbl td:first-child{text-align:center;color:var(--text3);font-size:12px;font-weight:500;width:36px}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:nth-child(odd) td{background:var(--row1)}
+.tbl tr:nth-child(even) td{background:var(--row2)}
+.tbl tr:hover td{background:#E8E8E4;cursor:pointer}
+
+.td-name{font-weight:500}
+.td-prenom{color:var(--text2)}
+
+/* badges catégorie */
+.cat{display:inline-block;padding:3px 9px;border-radius:20px;font-size:12px;font-weight:600}
+.cat-A1{background:var(--a1bg);color:var(--a1c)}
+.cat-A2{background:var(--a2bg);color:var(--a2c)}
+
+/* bilan */
+.bilan-cell{display:flex;flex-direction:column;gap:3px}
+.bilan-tag{font-size:11px;font-weight:500;padding:2px 7px;border-radius:4px;display:inline-block;width:fit-content}
+.bilan-tag.ok{background:#E6F5ED;color:var(--green)}
+.bilan-tag.ko{background:#FBEAEA;color:#A81E1E}
+.bilan-tag.empty{background:transparent;color:var(--text3);font-style:italic;font-weight:400;padding:0}
+
+.empty-row td{text-align:center;padding:40px;color:var(--text3);font-style:italic}
+
+.loader{text-align:center;padding:48px;color:var(--text3)}
+.loader-spinner{width:28px;height:28px;border:2px solid var(--border);border-top-color:var(--dark);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px}
+
+/* DRAWER */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:flex-end;justify-content:center}
+.overlay.open{display:flex}
+@media(min-width:600px){.overlay{align-items:center}.drawer{border-radius:var(--r)!important;max-width:480px}}
+.drawer{background:var(--card);width:100%;border-radius:var(--r) var(--r) 0 0;padding:20px 18px 36px;max-height:94vh;overflow-y:auto}
+.dw-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.dw-title{font-size:17px;font-weight:600}
+.dw-num{font-size:13px;color:var(--text3);margin-bottom:18px}
+.dw-close{background:var(--bg);border:none;width:30px;height:30px;border-radius:50%;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2)}
+.dw-close:hover{background:var(--border)}
+
+.fg{margin-bottom:14px}
+.fl{font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;display:block}
+.fi{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--rsm);padding:11px 12px;font-family:var(--font);font-size:15px;color:var(--text);outline:none;-webkit-appearance:none}
+.fi:focus{border-color:var(--dark);background:#fff}
+.fi::placeholder{color:var(--text3)}
+.fi-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+textarea.fi{resize:none;min-height:72px;line-height:1.5}
+
+/* bilan summary */
+.bilan-summary{background:var(--bg);border-radius:var(--rsm);padding:12px 14px;margin-bottom:16px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.bs-item{background:var(--card);border:1px solid var(--border);border-radius:var(--rsm);padding:10px 12px;text-align:center}
+.bs-val{font-size:15px;font-weight:600;color:var(--dark)}
+.bs-lbl{font-size:11px;color:var(--text3);margin-top:2px}
+.bs-empty{grid-column:1/-1;text-align:center;color:var(--text3);font-size:13px;font-style:italic;padding:6px 0}
+
+/* catégorie selector */
+.cat-sel{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.cat-opt{border:2px solid var(--border);border-radius:var(--rsm);padding:12px;text-align:center;cursor:pointer;font-size:15px;font-weight:600}
+.cat-opt:hover{border-color:var(--border2)}
+.cat-opt.on-A1{border-color:var(--a1c);background:var(--a1bg);color:var(--a1c)}
+.cat-opt.on-A2{border-color:var(--a2c);background:var(--a2bg);color:var(--a2c)}
+.cat-opt-sub{font-size:11px;font-weight:400;color:var(--text2);display:block;margin-top:2px}
+
+/* moniteur chips */
+.mchips{display:flex;gap:6px;flex-wrap:wrap}
+.mc{padding:7px 13px;border-radius:20px;border:1px solid var(--border);font-size:13px;cursor:pointer;background:var(--card)}
+.mc:hover{border-color:var(--border2)}
+.mc.on{background:rgba(45,45,45,.1);border-color:var(--dark);color:var(--dark);font-weight:500}
+
+.divider{height:1px;background:var(--border);margin:16px 0}
+.brow{display:flex;gap:8px;margin-top:18px}
+.bp{flex:1;background:var(--dark);color:#fff;border:none;border-radius:var(--rsm);padding:13px;font-family:var(--font);font-size:15px;font-weight:500;cursor:pointer}
+.bp:active{opacity:.85}
+.bp:disabled{opacity:.5;cursor:not-allowed}
+.bs2{background:var(--bg);color:var(--text2);border:none;border-radius:var(--rsm);padding:13px 16px;font-family:var(--font);font-size:14px;cursor:pointer}
+.bdel{background:#fbeaea;color:#a81e1e;border:none;border-radius:var(--rsm);padding:13px 14px;font-family:var(--font);font-size:14px;cursor:pointer}
+
+@media(max-width:540px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .col-moniteur,.col-cmt{display:none}
+}
+
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(70px);background:#1A1A18;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;z-index:999;transition:transform .28s;white-space:nowrap;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<header class="hd">
+  <div class="hd-top">
+    <div class="hd-logo">
+      <span class="hd-ecf">ECF</span>
+      <span class="hd-title">Suivi élèves – Moto A1 / A2</span>
+    </div>
+    <div class="hd-right">
+      <span class="hd-count" id="hdCount">—</span>
+      <button class="sync-btn" id="syncBtn" onclick="syncNow()">
+        <span class="sync-ico">↻</span> Sync
+      </button>
+    </div>
+  </div>
+  <div class="hd-sub">DAMNON | Synchronisé avec Google Sheets</div>
+</header>
+
+<div class="wrap">
+  <div class="topbar">
+    <div class="sw">
+      <span class="si">⌕</span>
+      <input type="text" id="sInput" placeholder="Rechercher un élève…" oninput="render()">
+    </div>
+    <div class="tabs">
+      <button class="tab on-all" data-f="all" onclick="setF('all')">Tous</button>
+      <button class="tab" data-f="A1" onclick="setF('A1')">A1</button>
+      <button class="tab" data-f="A2" onclick="setF('A2')">A2</button>
+    </div>
+    <button class="btn-add" onclick="openAdd()">+ Élève</button>
+  </div>
+
+  <div class="stats" id="statsRow"></div>
+
+  <div class="loader" id="loader"><div class="loader-spinner"></div>Chargement…</div>
+  <div class="tbl-wrap" id="tblWrap" style="display:none">
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th>N°</th>
+          <th>Nom / Prénom</th>
+          <th>Catégorie</th>
+          <th>Bilan estimatif 4e heure</th>
+          <th>Bilan estimatif 6e heure</th>
+          <th class="col-moniteur">Moniteur</th>
+          <th class="col-cmt">Commentaire</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="overlay" id="ov" onclick="closeOut(event)">
+  <div class="drawer">
+    <div class="dw-hd">
+      <span class="dw-title" id="dwTitle"></span>
+      <button class="dw-close" onclick="closeD()">×</button>
+    </div>
+    <div class="dw-num" id="dwNum"></div>
+    <div id="dwBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ╔══════════════════════════════════════════════════════════╗
+// ║  COLLER L'URL DU DÉPLOIEMENT APPS SCRIPT MOTO ICI       ║
+// ╚══════════════════════════════════════════════════════════╝
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz4rGyDzNs2VBV5iGMHe5MtQ2cT3f1mS8B4trp_kwKbmGuOZrBtqBd1W6B8FpeNxTaoKw/exec';
+
+const MONS = ['MARTIN','DAVID','JEAN-MICHEL'];
+let data = [], selM = null, selCat = null, filt = 'all';
+
+async function api(params) {
+  const url = SCRIPT_URL + '?' + new URLSearchParams(params).toString();
+  const r = await fetch(url);
+  const d = await r.json();
+  if (d.error) throw new Error(d.error);
+  return d;
+}
+
+window.addEventListener('DOMContentLoaded', fetchAll);
+
+async function fetchAll() {
+  setLoading(true);
+  try {
+    const d = await api({ action:'getAll' });
+    const fresh = d.eleves || [];
+    if (fresh.length === 0 && data.length > 0) {
+      // Sheet vide ou onglet introuvable — on conserve les données locales
+      toast('⚠ Sheet vide — vérifiez le nom de l\'onglet');
+    } else {
+      data = fresh;
+      saveLocal();
+    }
+  } catch(e) {
+    console.error('fetchAll:', e);
+    toast('⚠ Hors ligne — données locales conservées');
+    loadLocal();
+  }
+  render();
+  setLoading(false);
+}
+
+function syncNow() {
+  const btn = document.getElementById('syncBtn');
+  btn.classList.add('spinning');
+  fetchAll().finally(() => { btn.classList.remove('spinning'); toast('Synchronisé ✓'); });
+}
+
+function saveLocal() { try{ localStorage.setItem('ecfm_v1', JSON.stringify(data)); }catch(e){} }
+function loadLocal() { try{ const d=localStorage.getItem('ecfm_v1'); if(d) data=JSON.parse(d); }catch(e){} }
+function setLoading(on) {
+  document.getElementById('loader').style.display = on ? 'block' : 'none';
+  document.getElementById('tblWrap').style.display = on ? 'none' : 'block';
+}
+
+function setF(f) {
+  filt = f;
+  document.querySelectorAll('.tab').forEach(t => {
+    t.className = 'tab';
+    if (t.dataset.f === f) t.classList.add('on-'+f);
+  });
+  render();
+}
+
+// ── RENDER ──
+function render() {
+  const q = document.getElementById('sInput').value.toLowerCase().trim();
+  const list = data.filter(s => {
+    const mq = !q || (s.nom+' '+s.prenom).toLowerCase().includes(q) || (s.prenom+' '+s.nom).toLowerCase().includes(q);
+    const mf = filt==='all' || s.categorie===filt;
+    return mq && mf;
+  });
+
+  const total = data.length;
+  const a1    = data.filter(s => s.categorie==='A1').length;
+  const a2    = data.filter(s => s.categorie==='A2').length;
+  const avecB = data.filter(s => s.bilan4h || s.bilan6h).length;
+
+  document.getElementById('hdCount').textContent = total+' élève'+(total>1?'s':'');
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat"><div class="stat-val">${total}</div><div class="stat-lbl">Élèves</div></div>
+    <div class="stat"><div class="stat-val" style="color:var(--a1c)">${a1}</div><div class="stat-lbl">A1</div></div>
+    <div class="stat"><div class="stat-val" style="color:var(--a2c)">${a2}</div><div class="stat-lbl">A2</div></div>
+    <div class="stat"><div class="stat-val" style="color:var(--green)">${avecB}</div><div class="stat-lbl">Bilans saisis</div></div>
+  `;
+
+  const tbody = document.getElementById('tbody');
+  if (!list.length) { tbody.innerHTML='<tr class="empty-row"><td colspan="7">Aucun élève</td></tr>'; return; }
+
+  tbody.innerHTML = list.map(s => {
+    const num  = data.indexOf(s)+1;
+    const cat  = `<span class="cat cat-${s.categorie}">${s.categorie}</span>`;
+    const b4   = s.bilan4h ? `<span class="bilan-tag ok">${s.bilan4h}</span>` : `<span class="bilan-tag empty">—</span>`;
+    const b6   = s.bilan6h ? `<span class="bilan-tag ok">${s.bilan6h}</span>` : `<span class="bilan-tag empty">—</span>`;
+    const cmt  = s.commentaire ? `<span style="color:var(--text2);font-size:13px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block" title="${s.commentaire}">${s.commentaire}</span>` : `<span style="color:var(--text3);font-style:italic;font-size:13px">—</span>`;
+    return `<tr onclick="openFiche('${s.id}')">
+      <td>${num}</td>
+      <td><span class="td-name">${s.nom}</span> <span class="td-prenom">${s.prenom}</span></td>
+      <td>${cat}</td>
+      <td>${b4}</td>
+      <td>${b6}</td>
+      <td class="col-moniteur" style="color:var(--text2);font-size:13px">${s.moniteur}</td>
+      <td class="col-cmt">${cmt}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── FICHE ──
+function openFiche(id) {
+  const s = data.find(x => String(x.id)===String(id)); if (!s) return;
+  selM = s.moniteur; selCat = s.categorie;
+  document.getElementById('dwTitle').textContent = s.nom+' '+s.prenom;
+  document.getElementById('dwNum').textContent = 'Élève n°'+(data.indexOf(s)+1)+' · '+s.categorie+' · '+s.moniteur;
+
+  const hasB = s.bilan4h || s.bilan6h;
+  document.getElementById('dwBody').innerHTML = `
+    <div class="bilan-summary">
+      ${hasB ? `
+        <div class="bs-item"><div class="bs-val">${s.bilan4h||'—'}</div><div class="bs-lbl">Bilan 4e heure</div></div>
+        <div class="bs-item"><div class="bs-val">${s.bilan6h||'—'}</div><div class="bs-lbl">Bilan 6e heure</div></div>
+      ` : `<div class="bs-empty">Aucun bilan enregistré</div>`}
+    </div>
+
+    <div class="fg">
+      <label class="fl">Catégorie</label>
+      <div class="cat-sel">
+        <div class="cat-opt ${s.categorie==='A1'?'on-A1':''}" onclick="pickCat('A1')">
+          A1 <span class="cat-opt-sub">Permis A1</span>
+        </div>
+        <div class="cat-opt ${s.categorie==='A2'?'on-A2':''}" onclick="pickCat('A2')">
+          A2 <span class="cat-opt-sub">Permis A2</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="fi-row">
+      <div><label class="fl">Bilan estimatif 4e heure</label>
+        <input type="text" class="fi" id="fB4" value="${s.bilan4h||''}" placeholder="ex : Favorable"></div>
+      <div><label class="fl">Bilan estimatif 6e heure</label>
+        <input type="text" class="fi" id="fB6" value="${s.bilan6h||''}" placeholder="ex : À poursuivre"></div>
+    </div>
+
+    <div class="fg">
+      <label class="fl">Commentaire</label>
+      <textarea class="fi" id="fCmt" placeholder="Observations, points à travailler…">${s.commentaire||''}</textarea>
+    </div>
+
+    <div class="fg">
+      <label class="fl">Moniteur</label>
+      <div class="mchips">${MONS.map(m=>`<div class="mc ${s.moniteur===m?'on':''}" onclick="pM('${m}')">${m}</div>`).join('')}</div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="brow">
+      <button class="bdel" onclick="delEleve('${s.id}')">🗑</button>
+      <button class="bs2" onclick="closeD()">Fermer</button>
+      <button class="bp" id="saveBtn" onclick="saveF('${s.id}')">Enregistrer</button>
+    </div>`;
+  document.getElementById('ov').classList.add('open');
+}
+
+function pickCat(c) {
+  selCat = c;
+  document.querySelectorAll('.cat-opt').forEach(el => {
+    el.className = 'cat-opt';
+    if ((c==='A1'&&el.textContent.includes('A1')) || (c==='A2'&&el.textContent.includes('A2'))) el.classList.add('on-'+c);
+  });
+}
+function pM(m) {
+  selM = m;
+  document.querySelectorAll('.mc').forEach(el => el.classList.toggle('on', el.textContent===m));
+}
+
+async function saveF(id) {
+  const s = data.find(x => String(x.id)===String(id)); if (!s) return;
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true; btn.textContent = '…';
+  s.categorie   = selCat || s.categorie;
+  s.moniteur    = selM   || s.moniteur;
+  s.bilan4h     = document.getElementById('fB4').value.trim() || null;
+  s.bilan6h     = document.getElementById('fB6').value.trim() || null;
+  s.commentaire = document.getElementById('fCmt').value.trim();
+  try {
+    await api({ action:'save', id:s.id, nom:s.nom, prenom:s.prenom,
+      categorie:s.categorie, moniteur:s.moniteur,
+      bilan4h:s.bilan4h||'', bilan6h:s.bilan6h||'', commentaire:s.commentaire||'' });
+    saveLocal(); render(); closeD(); toast('Enregistré ✓');
+  } catch(e) {
+    toast('Erreur : '+e.message);
+    btn.disabled=false; btn.textContent='Enregistrer';
+  }
+}
+
+async function delEleve(id) {
+  if (!confirm('Supprimer cet élève ?')) return;
+  try {
+    await api({ action:'delete', id });
+    data = data.filter(s => String(s.id)!==String(id));
+    saveLocal(); render(); closeD(); toast('Supprimé');
+  } catch(e) { toast('Erreur suppression'); }
+}
+
+// ── ADD ──
+function openAdd() {
+  selM = MONS[0]; selCat = 'A2';
+  document.getElementById('dwTitle').textContent = 'Nouvel élève';
+  document.getElementById('dwNum').textContent = '';
+  document.getElementById('dwBody').innerHTML = `
+    <div class="fi-row">
+      <div><label class="fl">Nom</label><input type="text" class="fi" id="nNom" placeholder="NOM"></div>
+      <div><label class="fl">Prénom</label><input type="text" class="fi" id="nPre" placeholder="Prénom"></div>
+    </div>
+    <div class="fg">
+      <label class="fl">Catégorie</label>
+      <div class="cat-sel">
+        <div class="cat-opt" onclick="pickCat('A1')">A1 <span class="cat-opt-sub">Permis A1</span></div>
+        <div class="cat-opt on-A2" onclick="pickCat('A2')">A2 <span class="cat-opt-sub">Permis A2</span></div>
+      </div>
+    </div>
+    <div class="fg">
+      <label class="fl">Moniteur</label>
+      <div class="mchips">${MONS.map((m,i)=>`<div class="mc ${i===0?'on':''}" onclick="pM('${m}')">${m}</div>`).join('')}</div>
+    </div>
+    <div class="brow">
+      <button class="bs2" onclick="closeD()">Annuler</button>
+      <button class="bp" id="addBtn" onclick="addS()">Ajouter</button>
+    </div>`;
+  document.getElementById('ov').classList.add('open');
+}
+
+async function addS() {
+  const nom = document.getElementById('nNom').value.trim().toUpperCase();
+  const pre = document.getElementById('nPre').value.trim();
+  if (!nom||!pre) { toast('Nom et prénom requis'); return; }
+  const btn = document.getElementById('addBtn');
+  btn.disabled=true; btn.textContent='…';
+  try {
+    const res = await api({ action:'add', nom, prenom:pre,
+      categorie:selCat||'A2', moniteur:selM||MONS[0],
+      bilan4h:'', bilan6h:'', commentaire:'' });
+    data.push({ id:res.id, nom, prenom:pre, categorie:selCat||'A2',
+      moniteur:selM||MONS[0], bilan4h:null, bilan6h:null, commentaire:'' });
+    saveLocal(); render(); closeD(); toast(pre+' '+nom+' ajouté ✓');
+  } catch(e) {
+    toast('Erreur : '+e.message);
+    btn.disabled=false; btn.textContent='Ajouter';
+  }
+}
+
+function closeD() { document.getElementById('ov').classList.remove('open'); selM=null; selCat=null; }
+function closeOut(e) { if(e.target===document.getElementById('ov')) closeD(); }
+function toast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+</script>
+</body>
+</html>
